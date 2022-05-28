@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  app:
+    command: bash -c "python3 /film_library/run.py"
+    restart: always
+    build:
+      context: .
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./film_library:/film_library
+    depends_on:
+      - db
+    environment:
+      PYTHONUNBUFFERED: 1
+    env_file:
+      - .env
+  db:
+    image: postgres:latest
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
