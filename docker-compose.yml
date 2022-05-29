@@ -12,10 +12,11 @@ services:
       - ./film_library:/film_library
     depends_on:
       - db
-    environment:
-      PYTHONUNBUFFERED: 1
     env_file:
       - .env
+    environment:
+      PYTHONUNBUFFERED: 1
+      TEST_DB_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
   db:
     image: postgres:latest
     restart: always
@@ -23,6 +24,8 @@ services:
       - .env
     volumes:
       - db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
 
 volumes:
   db:
