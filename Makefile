@@ -12,4 +12,4 @@ rm:
 	$(COMPOSE) rm -f
 
 log-%:
-	docker logs $* -f
+	$(COMPOSE) logs -f $*
