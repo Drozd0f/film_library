@@ -2,7 +2,7 @@ import logging
 
 from sqlalchemy.exc import IntegrityError
 
-from config import DataBaseConfig
+from src import db
 from models.genres import Genre
 
 
@@ -11,13 +11,13 @@ log = logging.getLogger(__name__)
 
 def init_db():
     from models import (
-        directors, genres, users, films, films_genres
+        directors, films, films_genres, genres, users
     )
-    DataBaseConfig.Base.metadata.create_all(bind=DataBaseConfig.engine)
+    db.create_all()
     try:
         create_genres()
     except IntegrityError:
-        log.info('Table genres already exist')
+        log.info('Table genres already filled')
 
 
 def create_genres():
@@ -30,5 +30,5 @@ def create_genres():
     ]
     for idx, name in enumerate(genre_name):
         genre_name[idx] = Genre(name)
-    DataBaseConfig.db_session.add_all(genre_name)
-    DataBaseConfig.db_session.commit()
+    db.session.add_all(genre_name)
+    db.session.commit()

@@ -1,11 +1,22 @@
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
-from config import TestingConfig
-from src.database import init_db
+from config import DevConfig
+from src.views import route_blueprint
 
-app = Flask(__name__)
-app.config.from_object(TestingConfig)
 
-from . import views
+db = SQLAlchemy()
+migrate = Migrate()
 
-init_db()
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(DevConfig)
+
+    db.init_app(app)
+    migrate.init_app(app, db, directory='migrations')
+
+    app.register_blueprint(route_blueprint)
+
+    return app

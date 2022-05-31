@@ -1,13 +1,11 @@
-from sqlalchemy import Column, Integer, String, Boolean
-
-from config import DataBaseConfig
+from src import db
 
 
-class Genre(DataBaseConfig.Base):
+class Genre(db.Model):
     __tablename__ = 'genres'
 
-    genre_id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False, unique=True)
+    genre_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False, unique=True)
 
     def __init__(self, name: str):
         self.name = name

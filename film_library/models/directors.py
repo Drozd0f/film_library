@@ -1,14 +1,12 @@
-from sqlalchemy import Column, Integer, String
-
-from config import DataBaseConfig
+from src import db
 
 
-class Director(DataBaseConfig.Base):
+class Director(db.Model):
     __tablename__ = 'directors'
 
-    director_id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
-    surname = Column(String(255), nullable=False)
+    director_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    surname = db.Column(db.String(255), nullable=False)
 
     def __init__(self, name: str, surname: str):
         self.name = name

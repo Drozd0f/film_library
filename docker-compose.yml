@@ -1,4 +1,4 @@
-version: '3.4'
+version: '2.1'
 
 services:
   app:
@@ -11,12 +11,13 @@ services:
     volumes:
       - ./film_library:/film_library
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
     environment:
       PYTHONUNBUFFERED: 1
-      TEST_DB_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DEV_DB_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
   db:
     image: postgres:latest
     restart: always
@@ -26,6 +27,11 @@ services:
       - db:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+    healthcheck:
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER" ]
 
 volumes:
   db:
