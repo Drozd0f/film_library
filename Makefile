@@ -13,3 +13,6 @@ rm:
 
 log-%:
 	$(COMPOSE) logs -f $*
+
+lint:
+	@flake8

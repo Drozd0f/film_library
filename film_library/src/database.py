@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def init_db():
-    from models import (
+    from models import (  # noqa: F401 (Module imported but unused)
         directors, films, films_genres, genres, users
     )
     db.create_all()
