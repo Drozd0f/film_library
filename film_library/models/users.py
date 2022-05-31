@@ -1,15 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean
-
-from config import DataBaseConfig
+from src import db
 
 
-class User(DataBaseConfig.Base):
+class User(db.Model):
     __tablename__ = 'users'
 
-    user_id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
-    surname = Column(String(255), nullable=False)
-    is_staff = Column(Boolean, default=False)
+    user_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    surname = db.Column(db.String(255), nullable=False)
+    is_staff = db.Column(db.Boolean, default=False)
 
     def __init__(self, name: str, surname: str, is_staff: bool = False):
         self.name = name

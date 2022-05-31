@@ -1,11 +1,12 @@
-from flask import json
-
-from src import app
+from flask import json, Blueprint, Response
 
 
-@app.route('/ping/')
+route_blueprint = Blueprint('route_blueprint', __name__)
+
+
+@route_blueprint.route('/ping')
 def ping():
-    return app.response_class(
+    return Response(
         response=json.dumps({'msg': 'pong'}),
         status=200,
         mimetype='application/json'
