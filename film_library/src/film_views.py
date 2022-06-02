@@ -3,10 +3,11 @@ from pydantic import ValidationError
 
 from models.schemes.film import FilmModelSchema
 
-route_blueprint = Blueprint('route_blueprint', __name__)
+
+film_blueprint = Blueprint('film_blueprint', __name__)
 
 
-@route_blueprint.route('/ping')
+@film_blueprint.route('/ping')
 def ping():
     return Response(
         response=json.dumps({'msg': 'pong'}),
@@ -15,13 +16,13 @@ def ping():
     )
 
 
-@route_blueprint.route('/film', methods=['POST'])
+@film_blueprint.route('/api/v1/film', methods=['POST'])
 def create_film():
     try:
         film = FilmModelSchema(**request.get_json())  # noqa: F841 (variable use in domain)
     except ValidationError as e:
         return Response(
-            response=json.dumps({'validation_error': e.errors()}),
+            response=json.dumps({'msg': e.errors()}),
             status=400,
             mimetype='application/json'
         )

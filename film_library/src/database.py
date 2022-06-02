@@ -1,9 +1,11 @@
 import logging
+from werkzeug.security import generate_password_hash
 
 from sqlalchemy.exc import IntegrityError
 
-from src import db
+from src import db, login_manager
 from models.genres import Genre
+from models.users import User
 
 
 log = logging.getLogger(__name__)
@@ -32,3 +34,23 @@ def create_genres():
         genre_name[idx] = Genre(name)
     db.session.add_all(genre_name)
     db.session.commit()
+
+
+def create_user(user):
+    new_user = User(
+        name=user.name,
+        email=user.email,
+        password1=generate_password_hash(user.password1, method='sha256'),
+        password2=generate_password_hash(user.password2, method='sha256'),
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+
+def get_user(user) -> User:
+    return db.session.query(User).filter(User.email == user.email).one()
+
+
+@login_manager.user_loader
+def load_user(user_id):  # TODO: create Base model with method (example User.get(id)
+    return db.session.query(User).filter(User.user_id == user_id).one()
