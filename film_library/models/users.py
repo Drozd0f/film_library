@@ -19,8 +19,5 @@ class User(UserMixin, db.Model):
         self.password1 = password1
         self.password2 = password2
 
-    def get_id(self):
-        return self.user_id
-
     def __repr__(self):
         return f'<User(user_id={self.user_id}, name={self.name}, is_staff={self.is_staff})>'

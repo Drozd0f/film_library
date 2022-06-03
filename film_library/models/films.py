@@ -8,18 +8,20 @@ class Film(db.Model):
     __tablename__ = 'films'
 
     film_id = db.Column(db.Integer, primary_key=True)
-    genres_id = db.relationship('Genre', secondary=films_genres, backref='films')
-    release_date = db.DateTime(timezone=True)
+    name = db.Column(db.String(255), unique=True)
+    genres = db.relationship('Genre', secondary=films_genres, lazy='dynamic', backref='films')
+    release_date = db.Column(db.Date)
     director_id = db.Column(db.Integer, db.ForeignKey('directors.director_id', ondelete='SET NULL'))
     director = db.relationship('Director')
     description = db.Column(db.Text, nullable=True)
     rating = db.Column(db.Integer, nullable=False)
     poster = db.Column(db.Text, nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    user = db.relationship('User')
+    owner = db.relationship('User')
 
-    def __init__(self, release_date: datetime, description: str, rating: int,
+    def __init__(self, name: str, release_date: datetime, description: str, rating: int,
                  poster: str, director_id: int, owner_id: int):
+        self.name = name
         self.release_date = release_date
         self.description = description
         self.rating = rating
