@@ -1,15 +1,11 @@
 COMPOSE ?= docker-compose -f docker-compose.yml
 
-run: build
-	$(COMPOSE) up -d
+run:
+	$(COMPOSE) up --build -d
 	@echo http://localhost:5000
 
-build:
-	$(COMPOSE) build
-
 rm:
-	$(COMPOSE) stop
-	$(COMPOSE) rm -f
+	$(COMPOSE) rm -sfv
 
 log-%:
 	$(COMPOSE) logs -f $*

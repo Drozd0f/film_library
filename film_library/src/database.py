@@ -1,11 +1,15 @@
 import logging
+import typing as t
 from werkzeug.security import generate_password_hash
 
 from sqlalchemy.exc import IntegrityError
 
 from src import db, login_manager
+from src.filters import filter_generator
+from src.orders import get_order
 from models.genres import Genre
 from models.users import User
+from models.films import Film
 
 
 log = logging.getLogger(__name__)
@@ -52,5 +56,13 @@ def get_user(user) -> User:
 
 
 @login_manager.user_loader
-def load_user(user_id):  # TODO: create Base model with method (example User.get(id)
+def load_user(user_id):  # TODO: create Base model with method (example User.get(id))
     return db.session.query(User).filter(User.user_id == user_id).one()
+
+
+def get_films(query, page: int, limit: int) -> t.Tuple[t.List[Film], int]:
+    films = Film.query.join(Film.genres).filter(*filter_generator(query))
+    total_count = films.count()
+    current_page = (page - 1) * limit
+    films = films.order_by(get_order(query)).limit(limit).offset(current_page).all()
+    return films, total_count
