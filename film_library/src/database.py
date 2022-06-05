@@ -10,6 +10,7 @@ from src.orders import get_order
 from models.genres import Genre
 from models.users import User
 from models.films import Film
+from models.schemes.user import LoginUserSchema
 
 
 log = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ def create_user(user):
     db.session.commit()
 
 
-def get_user(user) -> User:
+def get_user(user: LoginUserSchema) -> User:
     return db.session.query(User).filter(User.email == user.email).one()
 
 

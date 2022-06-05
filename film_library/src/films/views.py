@@ -1,7 +1,7 @@
 from flask import json, Blueprint, Response, request
 from pydantic import ValidationError
 
-from src import domain
+from src.films import domain
 from models.schemes.film import RequestFilmSchema
 
 
