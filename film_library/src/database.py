@@ -3,6 +3,7 @@ import typing as t
 from werkzeug.security import generate_password_hash
 
 from sqlalchemy.exc import IntegrityError
+from flask_sqlalchemy import BaseQuery
 
 from src import db, login_manager
 from src.filters import filter_generator
@@ -10,7 +11,7 @@ from src.orders import get_order
 from models.genres import Genre
 from models.users import User
 from models.films import Film
-from models.schemes.user import LoginUserSchema
+from models.schemes.user import RegistrationUserSchema, LoginUserSchema
 
 
 log = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ def create_genres():
     db.session.commit()
 
 
-def create_user(user):
+def create_user(user: RegistrationUserSchema):
     new_user = User(
         name=user.name,
         email=user.email,
@@ -52,13 +53,16 @@ def create_user(user):
     db.session.commit()
 
 
+def create_film(user: User, film: dict, genres: BaseQuery):
+    new_film = Film(**film)
+    new_film.owner_id = user.user_id
+    new_film.genres.extend(genres)
+    db.session.add(new_film)
+    db.session.commit()
+
+
 def get_user(user: LoginUserSchema) -> User:
     return db.session.query(User).filter(User.email == user.email).one()
-
-
-@login_manager.user_loader
-def load_user(user_id):  # TODO: create Base model with method (example User.get(id))
-    return db.session.query(User).filter(User.user_id == user_id).one()
 
 
 def get_films(query, page: int, limit: int) -> t.Tuple[t.List[Film], int]:
@@ -67,3 +71,8 @@ def get_films(query, page: int, limit: int) -> t.Tuple[t.List[Film], int]:
     current_page = (page - 1) * limit
     films = films.order_by(get_order(query)).limit(limit).offset(current_page).all()
     return films, total_count
+
+
+@login_manager.user_loader
+def load_user(user_id):  # TODO: create Base model with method (example User.get(id))
+    return db.session.query(User).filter(User.user_id == user_id).one()

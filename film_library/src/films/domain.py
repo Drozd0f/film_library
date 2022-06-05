@@ -1,9 +1,24 @@
 import typing as t
 
+from flask import json
+
 from models.films import Film
-from models.schemes.film import ResponseFilmSchema
+from models.users import User
+from models.genres import Genre
+from models.schemes.film import RequestFilmSchema, ResponseFilmSchema
 from models.schemes.paginator import Paginator
 from src import database
+from src.films.exception import GenresNotMatchError
+from src.utils import unique_list
+
+
+def create_film(user: User, data: json):
+    film = RequestFilmSchema(**data).dict()
+    genres_ids = unique_list(film.pop('genres_id'))
+    stored_genres = Genre.get_genres(genres_ids)
+    if len(genres_ids) != len(stored_genres.all()):
+        raise GenresNotMatchError
+    database.create_film(user, film, stored_genres)
 
 
 def convert_orm_to_pydent_dict(orm_models: t.List[Film]) -> t.List[dict]:

@@ -1,8 +1,10 @@
 from flask import json, Blueprint, Response, request
+from flask_login import login_required, current_user
 from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 from src.films import domain
-from models.schemes.film import RequestFilmSchema
+from src.films.exception import GenresNotMatchError
 
 
 film_blueprint = Blueprint('film_blueprint', __name__)
@@ -18,16 +20,28 @@ def ping():
 
 
 @film_blueprint.route('/api/v1/films', methods=['POST'])
+@login_required
 def create_film():
     try:
-        film = RequestFilmSchema(**request.get_json())  # noqa: F841 (variable use in domain)
+        domain.create_film(current_user, request.get_json())
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
             status=400,
             mimetype='application/json'
         )
-    # TODO: domain function
+    except IntegrityError:
+        return Response(
+            response=json.dumps({'msg': 'film with this name already exists'}),
+            status=409,
+            mimetype='application/json'
+        )
+    except GenresNotMatchError:
+        return Response(
+            response=json.dumps({'msg': 'unknown genres ids'}),
+            status=400,
+            mimetype='application/json'
+        )
     return Response(
         response=json.dumps({'msg': 'film is created'}),
         status=200,
