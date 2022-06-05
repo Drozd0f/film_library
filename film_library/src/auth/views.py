@@ -3,10 +3,7 @@ from flask_login import login_user, login_required, logout_user
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from pydantic import ValidationError
 
-from models.schemes.user import UserModelSchema
-from src.database import create_user, get_user
-from src.utils import check_password
-
+from src.auth import domain, exception
 
 auth_blueprint = Blueprint('auth_blueprint', __name__)
 
@@ -14,8 +11,7 @@ auth_blueprint = Blueprint('auth_blueprint', __name__)
 @auth_blueprint.route('/api/v1/registration', methods=['POST'])
 def registration():
     try:
-        user = UserModelSchema(**request.get_json())
-        create_user(user)
+        domain.registration(request.get_json())
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
@@ -40,8 +36,7 @@ def login():
     data = request.get_json()
     remember = bool(data.pop('remember', None))
     try:
-        user = UserModelSchema(**request.get_json())
-        stored_user = get_user(user)
+        user = domain.login(request.get_json())
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
@@ -54,13 +49,13 @@ def login():
             status=404,
             mimetype='application/json'
         )
-    if not check_password(user.password1, stored_user.password1):
+    except exception.PasswordNotMatchError:
         return Response(
             response=json.dumps({'msg': 'wrong password'}),
             status=400,
             mimetype='application/json'
         )
-    login_user(stored_user, remember=remember)
+    login_user(user, remember=remember)
     return Response(
         response=json.dumps({'msg': 'successful login'}),
         status=200,

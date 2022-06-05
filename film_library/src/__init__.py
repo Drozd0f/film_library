@@ -19,8 +19,8 @@ def create_app():
     login_manager.init_app(app)
     migrate.init_app(app, db, directory='migrations')
 
-    from src.film_views import film_blueprint
-    from src.auth_views import auth_blueprint
+    from src.films.views import film_blueprint
+    from src.auth.views import auth_blueprint
 
     app.register_blueprint(film_blueprint)
     app.register_blueprint(auth_blueprint)
