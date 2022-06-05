@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from flask_sqlalchemy import BaseQuery
+
 from src import db
 from models.films_genres import films_genres
 
@@ -27,6 +29,22 @@ class Film(db.Model):
         self.rating = rating
         self.poster = poster
         self.director_id = director_id
+
+    @classmethod
+    def get(cls, id_):
+        return cls.query.filter(cls.film_id == id_).first()
+
+    @classmethod
+    def update(cls, id_: int, new_data: dict, genres: BaseQuery):
+        cls.query.filter(cls.film_id == id_).update(new_data)
+        cls.get(id_).genres = genres
+        db.session.commit()
+
+    @classmethod
+    def delete(cls, id_: int):
+        cls.get(id_).genres = []
+        cls.query.filter(cls.film_id == id_).delete()
+        db.session.commit()
 
     def __repr__(self):
         return f'<Film(film_id={self.film_id}, director_id={self.director_id}, user_id={self.owner_id})>'

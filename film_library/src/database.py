@@ -73,6 +73,14 @@ def get_films(query, page: int, limit: int) -> t.Tuple[t.List[Film], int]:
     return films, total_count
 
 
+def update_film(id_: int, film: dict, genres: BaseQuery):
+    Film.update(id_, film, genres)
+
+
+def delete_film(id_: int):
+    Film.delete(id_)
+
+
 @login_manager.user_loader
 def load_user(user_id):  # TODO: create Base model with method (example User.get(id))
     return db.session.query(User).filter(User.user_id == user_id).one()
