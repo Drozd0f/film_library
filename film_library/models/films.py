@@ -20,14 +20,13 @@ class Film(db.Model):
     owner = db.relationship('User')
 
     def __init__(self, name: str, release_date: datetime, description: str, rating: int,
-                 poster: str, director_id: int, owner_id: int):
+                 poster: str, director_id: int):
         self.name = name
         self.release_date = release_date
         self.description = description
         self.rating = rating
         self.poster = poster
         self.director_id = director_id
-        self.owner_id = owner_id
 
     def __repr__(self):
         return f'<Film(film_id={self.film_id}, director_id={self.director_id}, user_id={self.owner_id})>'

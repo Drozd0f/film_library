@@ -15,7 +15,6 @@ class BaseFilmSchema(BaseModel):
 class RequestFilmSchema(BaseFilmSchema):
     genres_id: t.List[int]
     director_id: int
-    owner_id: int
 
 
 class ResponseFilmSchema(BaseFilmSchema):
