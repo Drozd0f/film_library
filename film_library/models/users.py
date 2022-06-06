@@ -22,5 +22,9 @@ class User(UserMixin, db.Model):
     def get_id(self):
         return self.user_id
 
+    @classmethod
+    def get_by_email(cls, email: str):
+        return cls.query.filter(cls.email == email).first()
+
     def __repr__(self):
         return f'<User(user_id={self.user_id}, name={self.name}, is_staff={self.is_staff})>'

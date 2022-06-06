@@ -1,6 +1,5 @@
 from flask import json, Blueprint, Response, request
 from flask_login import login_user, login_required, logout_user
-from sqlalchemy.exc import IntegrityError, NoResultFound
 from pydantic import ValidationError
 
 from src.auth import domain, exception
@@ -18,7 +17,7 @@ def registration():
             status=400,
             mimetype='application/json'
         )
-    except IntegrityError:
+    except exception.UserExistError:
         return Response(
             response=json.dumps({'msg': 'user with this email already exists'}),
             status=409,
@@ -43,7 +42,7 @@ def login():
             status=400,
             mimetype='application/json'
         )
-    except NoResultFound:
+    except exception.UserNotExistError:
         return Response(
             response=json.dumps({'msg': 'user don\'t exists'}),
             status=404,
