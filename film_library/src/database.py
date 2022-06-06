@@ -11,7 +11,7 @@ from src.orders import get_order
 from models.genres import Genre
 from models.users import User
 from models.films import Film
-from models.schemes.user import RegistrationUserSchema, LoginUserSchema
+from models.schemes.user import RegistrationUserSchema
 
 
 log = logging.getLogger(__name__)
@@ -59,10 +59,6 @@ def create_film(user: User, film: dict, genres: BaseQuery):
     new_film.genres.extend(genres)
     db.session.add(new_film)
     db.session.commit()
-
-
-def get_user(user: LoginUserSchema) -> User:
-    return db.session.query(User).filter(User.email == user.email).one()
 
 
 def get_films(query, page: int, limit: int) -> t.Tuple[t.List[Film], int]:
