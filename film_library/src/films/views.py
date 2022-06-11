@@ -7,10 +7,10 @@ from src.films import domain
 from src.films import exception
 
 
-film_blueprint = Blueprint('film_blueprint', __name__)
+film_blueprint = Blueprint('film_blueprint', __name__, url_prefix='/api/v1')
 
 
-@film_blueprint.route('/ping')
+@film_blueprint.route('/films/ping')
 def ping():
     return Response(
         response=json.dumps({'msg': 'pong'}),
@@ -19,11 +19,28 @@ def ping():
     )
 
 
-@film_blueprint.route('/api/v1/films', methods=['POST'])
+@film_blueprint.route('/films/<int:film_id>', methods=['GET'])
+def get_film_by_id(film_id: int):
+    try:
+        film = domain.get_film_by_id(film_id)
+    except exception.FilmIdNotFoundError:
+        return Response(
+            response=json.dumps({'msg': 'film don\'t exists'}),
+            status=404,
+            mimetype='application/json'
+        )
+    return Response(
+        response=json.dumps(film.dict(), sort_keys=True, default=str),
+        status=200,
+        mimetype='application/json'
+    )
+
+
+@film_blueprint.route('/films', methods=['POST'])
 @login_required
 def create_film():
     try:
-        domain.create_film(current_user, request.get_json())
+        film = domain.create_film(current_user, request.get_json())
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
@@ -43,17 +60,17 @@ def create_film():
             mimetype='application/json'
         )
     return Response(
-        response=json.dumps({'msg': 'film is created'}),
+        response=json.dumps(film.dict(), sort_keys=True, default=str),
         status=200,
         mimetype='application/json'
     )
 
 
-@film_blueprint.route('/api/v1/films', methods=['PATCH'])
+@film_blueprint.route('/films/<int:film_id>', methods=['PATCH'])
 @login_required
-def update_films():
+def update_films(film_id: int):
     try:
-        domain.update_film(current_user, request.get_json())
+        film = domain.update_film(film_id, current_user, request.get_json())
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
@@ -85,17 +102,17 @@ def update_films():
             mimetype='application/json'
         )
     return Response(
-        response=json.dumps({'msg': 'film is updated'}),
+        response=json.dumps(film.dict(), sort_keys=True, default=str),
         status=200,
         mimetype='application/json'
     )
 
 
-@film_blueprint.route('/api/v1/films', methods=['DELETE'])
+@film_blueprint.route('/films/<int:film_id>', methods=['DELETE'])
 @login_required
-def delete_films():
+def delete_films(film_id: int):
     try:
-        domain.delete_film(current_user, request.get_json())
+        film = domain.delete_film(film_id, current_user)
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
@@ -121,13 +138,13 @@ def delete_films():
             mimetype='application/json'
         )
     return Response(
-        response=json.dumps({'msg': 'film is deleted'}),
+        response=json.dumps(film.dict(), sort_keys=True, default=str),
         status=200,
         mimetype='application/json'
     )
 
 
-@film_blueprint.route('/api/v1/films', methods=['GET'])
+@film_blueprint.route('/films', methods=['GET'])
 def get_films():
     return Response(
         response=json.dumps(domain.get_films(request.args), sort_keys=True, default=str),

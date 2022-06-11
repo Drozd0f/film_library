@@ -53,12 +53,17 @@ def create_user(user: RegistrationUserSchema):
     db.session.commit()
 
 
-def create_film(user: User, film: dict, genres: BaseQuery):
+def create_film(user: User, film: dict, genres: BaseQuery) -> Film:
     new_film = Film(**film)
     new_film.owner_id = user.user_id
     new_film.genres.extend(genres)
     db.session.add(new_film)
     db.session.commit()
+    return new_film
+
+
+def get_film(film_id) -> Film:
+    return Film.get(film_id)
 
 
 def get_films(query, page: int, limit: int) -> t.Tuple[t.List[Film], int]:
@@ -69,8 +74,8 @@ def get_films(query, page: int, limit: int) -> t.Tuple[t.List[Film], int]:
     return films, total_count
 
 
-def update_film(id_: int, film: dict, genres: BaseQuery):
-    Film.update(id_, film, genres)
+def update_film(id_: int, film: dict, genres: BaseQuery) -> Film:
+    return Film.update(id_, film, genres)
 
 
 def delete_film(id_: int):

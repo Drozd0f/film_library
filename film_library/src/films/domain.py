@@ -6,19 +6,21 @@ from flask_sqlalchemy import BaseQuery
 from models.films import Film
 from models.users import User
 from models.genres import Genre
-from models.schemes.film import RequestNotExitsFilmSchema, RequestExistFilmSchema, ResponseFilmSchema
+from models.schemes.film import RequestFilmSchema, ResponseFilmSchema
 from models.schemes.paginator import Paginator
 from src import database
 from src.films import exception
 from src.utils import unique_list
 
 
-def check_film(id_: int, user: User):
-    film = Film.get(id_)
+def check_film(id_: int, user: t.Optional[User] = None) -> Film:
+    film = database.get_film(id_)
     if film is None:
         raise exception.FilmIdNotFoundError
-    elif film.owner_id != user.user_id or user.is_staff:
-        raise exception.UserNotOwnerError
+    elif user is not None:
+        if film.owner_id != user.user_id or user.is_staff:
+            raise exception.UserNotOwnerError
+    return film
 
 
 def check_genres(genres_id: t.List[int]) -> BaseQuery:
@@ -29,27 +31,30 @@ def check_genres(genres_id: t.List[int]) -> BaseQuery:
     return stored_genres
 
 
-def create_film(user: User, data: json):
-    film = RequestNotExitsFilmSchema(**data).dict()
+def get_film_by_id(film_id: int) -> ResponseFilmSchema:
+    film = check_film(film_id)
+    return ResponseFilmSchema.from_orm(film)
+
+
+def create_film(user: User, data: json) -> ResponseFilmSchema:
+    film = RequestFilmSchema(**data).dict()
     genres_id = film.pop('genres_id')
     genres = check_genres(genres_id)
-    database.create_film(user, film, genres)
+    return ResponseFilmSchema.from_orm(database.create_film(user, film, genres))
 
 
-def update_film(user: User, data: json):
-    film = RequestExistFilmSchema(**data).dict()
-    id_ = film.pop('film_id')
-    check_film(id_, user)
+def update_film(film_id: int, user: User, data: json) -> ResponseFilmSchema:
+    film = RequestFilmSchema(**data).dict()
+    check_film(film_id, user)
     genres = check_genres(film.pop('genres_id'))
-    database.update_film(id_, film, genres)
+    updated_film = database.update_film(film_id, film, genres)
+    return ResponseFilmSchema.from_orm(updated_film)
 
 
-def delete_film(user: User, data: json):
-    film = RequestExistFilmSchema(**data).dict()
-    id_ = film.pop('film_id')
-    check_film(id_, user)
-    check_genres(film.pop('genres_id'))
-    database.delete_film(id_)
+def delete_film(film_id: int, user: User) -> ResponseFilmSchema:
+    film = ResponseFilmSchema.from_orm(check_film(film_id, user))
+    database.delete_film(film_id)
+    return film
 
 
 def convert_orm_to_pydent_dict(orm_models: t.List[Film]) -> t.List[dict]:
