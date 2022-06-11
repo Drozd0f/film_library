@@ -12,13 +12,9 @@ class BaseFilmSchema(BaseModel):
     poster: HttpUrl
 
 
-class RequestNotExitsFilmSchema(BaseFilmSchema):
+class RequestFilmSchema(BaseFilmSchema):
     genres_id: t.List[int]
     director_id: int
-
-
-class RequestExistFilmSchema(RequestNotExitsFilmSchema):
-    film_id: int
 
 
 class ResponseFilmSchema(BaseFilmSchema):

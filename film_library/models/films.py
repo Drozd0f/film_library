@@ -1,3 +1,4 @@
+from __future__ import annotations
 from datetime import datetime
 
 from flask_sqlalchemy import BaseQuery
@@ -31,14 +32,15 @@ class Film(db.Model):
         self.director_id = director_id
 
     @classmethod
-    def get(cls, id_):
+    def get(cls, id_) -> Film:
         return cls.query.filter(cls.film_id == id_).first()
 
     @classmethod
-    def update(cls, id_: int, new_data: dict, genres: BaseQuery):
+    def update(cls, id_: int, new_data: dict, genres: BaseQuery) -> Film:
         cls.query.filter(cls.film_id == id_).update(new_data)
         cls.get(id_).genres = genres
         db.session.commit()
+        return cls.get(id_)
 
     @classmethod
     def delete(cls, id_: int):

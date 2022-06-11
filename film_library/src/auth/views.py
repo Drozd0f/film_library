@@ -4,10 +4,10 @@ from pydantic import ValidationError
 
 from src.auth import domain, exception
 
-auth_blueprint = Blueprint('auth_blueprint', __name__)
+auth_blueprint = Blueprint('auth_blueprint', __name__, url_prefix='/api/v1')
 
 
-@auth_blueprint.route('/api/v1/registration', methods=['POST'])
+@auth_blueprint.route('/registration', methods=['POST'])
 def registration():
     try:
         domain.registration(request.get_json())
@@ -30,7 +30,7 @@ def registration():
     )
 
 
-@auth_blueprint.route('/api/v1/login', methods=['POST'])
+@auth_blueprint.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     remember = bool(data.pop('remember', None))
@@ -62,7 +62,7 @@ def login():
     )
 
 
-@auth_blueprint.route('/api/v1/logout', methods=['GET'])
+@auth_blueprint.route('/logout', methods=['GET'])
 @login_required
 def logout():
     logout_user()
