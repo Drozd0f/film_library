@@ -1,7 +1,6 @@
 from flask import json, Blueprint, Response, request
 from flask_login import login_required
 from pydantic import ValidationError
-from sqlalchemy.exc import IntegrityError
 
 from src.domain import films_dom
 from src.exception import films_exc
@@ -47,7 +46,7 @@ def create_film():
             status=400,
             mimetype='application/json'
         )
-    except IntegrityError:
+    except films_exc.FilmNameExist:
         return Response(
             response=json.dumps({'msg': 'film with this name already exists'}),
             status=409,
@@ -61,7 +60,7 @@ def create_film():
         )
     return Response(
         response=json.dumps(film.dict(), sort_keys=True, default=str),
-        status=200,
+        status=201,
         mimetype='application/json'
     )
 
@@ -77,7 +76,7 @@ def update_films(film_id: int):
             status=400,
             mimetype='application/json'
         )
-    except IntegrityError:
+    except films_exc.FilmNameExist:
         return Response(
             response=json.dumps({'msg': 'film with this name already exists'}),
             status=409,
@@ -91,7 +90,7 @@ def update_films(film_id: int):
         )
     except films_exc.UserNotOwnerError:
         return Response(
-            response=json.dumps({'msg': 'user has insufficient rights'}),
+            response=json.dumps({'msg': 'permission denied'}),
             status=403,
             mimetype='application/json'
         )
@@ -113,12 +112,6 @@ def update_films(film_id: int):
 def delete_films(film_id: int):
     try:
         film = films_dom.delete_film(film_id)
-    except ValidationError as e:
-        return Response(
-            response=json.dumps({'msg': e.errors()}),
-            status=400,
-            mimetype='application/json'
-        )
     except films_exc.FilmIdNotFoundError:
         return Response(
             response=json.dumps({'msg': 'film don\'t exists'}),
@@ -127,14 +120,8 @@ def delete_films(film_id: int):
         )
     except films_exc.UserNotOwnerError:
         return Response(
-            response=json.dumps({'msg': 'user has insufficient rights'}),
+            response=json.dumps({'msg': 'permission denied'}),
             status=403,
-            mimetype='application/json'
-        )
-    except films_exc.GenresNotMatchError:
-        return Response(
-            response=json.dumps({'msg': 'unknown genres ids'}),
-            status=400,
             mimetype='application/json'
         )
     return Response(

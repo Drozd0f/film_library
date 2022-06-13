@@ -1,5 +1,3 @@
-from werkzeug.security import generate_password_hash
-
 from flask import json
 
 from src.db.database import create_user, get_user
@@ -12,8 +10,6 @@ def registration(data: json):
     new_user = user.RegistrationUserSchema(**data)
     if get_user(new_user.email) is not None:
         raise auth_exc.UserExistError
-    new_user.password1 = generate_password_hash(new_user.password1, method='sha256')
-    new_user.password2 = generate_password_hash(new_user.password2, method='sha256')
     create_user(new_user)
 
 

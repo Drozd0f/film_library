@@ -11,8 +11,11 @@ from src.db.orders import get_order
 from src.db.models.genres import Genre
 from src.db.models.users import User
 from src.db.models.films import Film
+from src.db.models.films_genres import films_genres
+from src.db.models.directors import Director
 from src.domain.schemes.user import RegistrationUserSchema
 from src.domain.schemes.film import ResponseFilmSchema
+from src.exception.films_exc import FilmNameExist
 
 
 log = logging.getLogger(__name__)
@@ -52,9 +55,22 @@ def create_user(user: RegistrationUserSchema):
 
 
 def create_film(user: User, film: dict, genres: BaseQuery) -> ResponseFilmSchema:
-    return ResponseFilmSchema.from_orm(
-        Film.create(user, film, genres)
-    )
+    try:
+        return ResponseFilmSchema.from_orm(
+            Film.create(user, film, genres)
+        )
+    except IntegrityError:
+        db.session.rollback()
+        raise FilmNameExist
+
+
+def create_director(name: str, surname: str):
+    new_director = Director(name=name, surname=surname)
+    db.session.add(new_director)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
 
 
 def get_user(user_email: str) -> User:
@@ -84,9 +100,13 @@ def get_genres(genres_ids: t.List[int]) -> BaseQuery:
 
 
 def update_film(id_: int, film: dict, genres: BaseQuery) -> ResponseFilmSchema:
-    return ResponseFilmSchema.from_orm(
-        Film.update(id_, film, genres)
-    )
+    try:
+        return ResponseFilmSchema.from_orm(
+            Film.update(id_, film, genres)
+        )
+    except IntegrityError:
+        db.session.rollback()
+        raise FilmNameExist
 
 
 def delete_film(id_: int) -> ResponseFilmSchema:
@@ -99,3 +119,10 @@ def delete_film(id_: int) -> ResponseFilmSchema:
 @login_manager.user_loader
 def load_user(user_id: int) -> User:
     return db.session.query(User).filter(User.user_id == user_id).one()
+
+
+def cleanup():
+    tables = (films_genres, Film, User, Director)
+    for table in tables:
+        db.session.query(table).delete()
+    db.session.commit()
