@@ -1,9 +1,10 @@
+from __future__ import annotations
+
+from src.app import db
 from flask_login import UserMixin
 
-from src import db
 
-
-class User(UserMixin, db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -19,12 +20,27 @@ class User(UserMixin, db.Model):
         self.password1 = password1
         self.password2 = password2
 
-    def get_id(self):
-        return self.user_id
+    @classmethod
+    def create(cls, data: dict) -> User:
+        new_user = cls(**data)
+        db.session.add(new_user)
+        db.session.commit()
+        return new_user
 
     @classmethod
-    def get_by_email(cls, email: str):
-        return cls.query.filter(cls.email == email).first()
+    def get(cls, id_: int) -> User:
+        return db.session.query(cls).filter(cls.user_id == id_).first()
+
+    @classmethod
+    def get_by_email(cls, email: str) -> User:
+        return (
+            db.session.query(cls).
+            filter(cls.email == email).
+            first()
+        )
+
+    def get_id(self):
+        return self.user_id
 
     def __repr__(self):
         return f'<User(user_id={self.user_id}, name={self.name}, is_staff={self.is_staff})>'

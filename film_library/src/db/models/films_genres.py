@@ -1,4 +1,4 @@
-from src import db
+from src.app import db
 
 
 films_genres = db.Table(

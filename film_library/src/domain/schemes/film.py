@@ -20,7 +20,7 @@ class RequestFilmSchema(BaseFilmSchema):
 class ResponseFilmSchema(BaseFilmSchema):
     film_id: int
     genres: t.List[dict]
-    director: t.Dict[str, t.Any]
+    director: t.Union[t.Dict[str, t.Any], str]
     owner: t.Dict[str, t.Any]
 
     @validator('genres', pre=True, check_fields=False)
@@ -30,6 +30,8 @@ class ResponseFilmSchema(BaseFilmSchema):
 
     @validator('director', pre=True, check_fields=False)
     def evaluate_director(cls, v):
+        if v is None:
+            return 'unknown'
         return {
             'id': v.director_id,
             'name': v.name,

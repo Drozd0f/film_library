@@ -1,7 +1,7 @@
 import typing as t
 from werkzeug.datastructures import ImmutableMultiDict
 
-from models.films import Film
+from src.db.models.films import Film
 from flask_sqlalchemy import BaseQuery
 
 
@@ -21,5 +21,5 @@ orders = {
 
 def get_order(query: ImmutableMultiDict) -> t.Optional[BaseQuery]:
     for o_name, o_value in query.items():
-        if o_name in orders:
-            return orders[o_name](o_value)
+        if o_value in orders:
+            return orders[o_value]()

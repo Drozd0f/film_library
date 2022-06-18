@@ -1,6 +1,6 @@
 from flask_sqlalchemy import BaseQuery
 
-from src import db
+from src.app import db
 
 
 class Genre(db.Model):
