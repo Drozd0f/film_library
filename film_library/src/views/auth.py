@@ -2,7 +2,9 @@ from flask import json, Blueprint, Response, request
 from flask_login import login_user, login_required, logout_user
 from pydantic import ValidationError
 
-from src.auth import domain, exception
+from src.domain import auth_dom
+from src.exception import auth_exc
+
 
 auth_blueprint = Blueprint('auth_blueprint', __name__, url_prefix='/api/v1')
 
@@ -10,14 +12,14 @@ auth_blueprint = Blueprint('auth_blueprint', __name__, url_prefix='/api/v1')
 @auth_blueprint.route('/registration', methods=['POST'])
 def registration():
     try:
-        domain.registration(request.get_json())
+        auth_dom.registration(request.get_json())
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
             status=400,
             mimetype='application/json'
         )
-    except exception.UserExistError:
+    except auth_exc.UserExistError:
         return Response(
             response=json.dumps({'msg': 'user with this email already exists'}),
             status=409,
@@ -35,20 +37,20 @@ def login():
     data = request.get_json()
     remember = bool(data.pop('remember', None))
     try:
-        user = domain.login(request.get_json())
+        user = auth_dom.login(request.get_json())
     except ValidationError as e:
         return Response(
             response=json.dumps({'msg': e.errors()}),
             status=400,
             mimetype='application/json'
         )
-    except exception.UserNotExistError:
+    except auth_exc.UserNotExistError:
         return Response(
             response=json.dumps({'msg': 'user don\'t exists'}),
             status=404,
             mimetype='application/json'
         )
-    except exception.PasswordNotMatchError:
+    except auth_exc.PasswordNotMatchError:
         return Response(
             response=json.dumps({'msg': 'wrong password'}),
             status=400,

@@ -3,8 +3,9 @@ from datetime import datetime
 
 from flask_sqlalchemy import BaseQuery
 
-from src import db
-from models.films_genres import films_genres
+from src.app import db
+from src.db.models.films_genres import films_genres
+from src.db.models.users import User
 
 
 class Film(db.Model):
@@ -32,20 +33,32 @@ class Film(db.Model):
         self.director_id = director_id
 
     @classmethod
-    def get(cls, id_) -> Film:
-        return cls.query.filter(cls.film_id == id_).first()
+    def create(cls, user: User, data: dict, genres: BaseQuery):
+        new_film = Film(**data)
+        new_film.owner_id = user.user_id
+        new_film.genres.extend(genres)
+        db.session.add(new_film)
+        db.session.commit()
+        return new_film
+
+    @classmethod
+    def get(cls, id_):
+        return (
+            db.session.query(cls).
+            filter(cls.film_id == id_).
+            first()
+        )
 
     @classmethod
     def update(cls, id_: int, new_data: dict, genres: BaseQuery) -> Film:
-        cls.query.filter(cls.film_id == id_).update(new_data)
+        db.session.query(cls).filter(cls.film_id == id_).update(new_data)
         cls.get(id_).genres = genres
         db.session.commit()
         return cls.get(id_)
 
     @classmethod
     def delete(cls, id_: int):
-        cls.get(id_).genres = []
-        cls.query.filter(cls.film_id == id_).delete()
+        db.session.delete(cls.get(id_))
         db.session.commit()
 
     def __repr__(self):
