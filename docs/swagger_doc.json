@@ -1,0 +1,1096 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Film library API",
+    "description": "Film library API",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost/api/v1",
+      "description": "Main dev server"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Paginator": {
+        "type": "object",
+        "properties": {
+          "films": {
+            "type": "array",
+            "minimum": 0,
+            "maximum": 100,
+            "items": {
+              "$ref": "#/components/schemas/FilmResponse"
+            }
+          },
+          "paginator": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "total_pages": {
+                "type": "integer",
+                "example": 1
+              }
+            }
+          }
+        }
+      },
+      "BaseFilm": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Lorem ipsum"
+          },
+          "release_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2008-07-14"
+          },
+          "description": {
+            "type": "string",
+            "example": "Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "example": 9
+          },
+          "poster": {
+            "type": "string",
+            "example": "https://en.wikipedia.org/wiki/File:The_Dark_Knight_(2008_film).jpg"
+          }
+        },
+        "required": [
+          "name",
+          "release_date",
+          "rating",
+          "poster"
+        ]
+      },
+      "FilmRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseFilm"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "genres_id": {
+                "type": "array",
+                "example": [
+                  1,
+                  4
+                ],
+                "minimum": 1,
+                "maximum": 9,
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "director_id": {
+                "type": "integer",
+                "example": 1
+              }
+            },
+            "required": [
+              "genres_id",
+              "director_id"
+            ]
+          }
+        ]
+      },
+      "FilmResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseFilm"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "film_id": {
+                "type": "integer",
+                "example": 1
+              },
+              "genres": {
+                "type": "array",
+                "minimum": 1,
+                "maximum": 9,
+                "items": {
+                  "$ref": "#/components/schemas/Genre"
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "Action"
+                  },
+                  {
+                    "id": 4,
+                    "name": "Fantasy"
+                  }
+                ]
+              },
+              "director": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ExistDirector"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NotExistDirector"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "genres",
+              "director"
+            ]
+          }
+        ]
+      },
+      "ExistDirector": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Lorem ipsum"
+          },
+          "surname": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Lorem ipsum"
+          }
+        }
+      },
+      "NotExistDirector": {
+        "type": "string",
+        "example": "unkmown"
+      },
+      "Genre": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Action"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "LoginUser": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "lorem@gmail.com"
+          },
+          "password1": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8,
+            "maxLength": 30,
+            "example": "12345678"
+          }
+        },
+        "required": [
+          "email",
+          "password1"
+        ]
+      },
+      "RegistrationUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LoginUser"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 255,
+                "example": "Lorem ipsum"
+              },
+              "password2": {
+                "type": "string",
+                "format": "password",
+                "minLength": 8,
+                "maxLength": 30,
+                "example": "12345678"
+              }
+            },
+            "required": [
+              "name",
+              "password2"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/ping": {
+      "get": {
+        "tags": [
+          "healthcheck"
+        ],
+        "summary": "Returns message \"pong\"",
+        "responses": {
+          "200": {
+            "description": "Server is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "pong"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/films": {
+      "get": {
+        "tags": [
+          "Films"
+        ],
+        "summary": "Returns a list of films and pagination information",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "example": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "example": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "genres",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9
+              },
+              "example": [
+                1,
+                4
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "release_year_range",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "date"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "example": [
+                "2007-07-14",
+                "2009-07-14"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "directors",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "example": [
+                1
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string",
+              "example": "Lor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sorted_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "rating",
+                "release_date"
+              ],
+              "example": "rating"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of films",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Paginator"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Films"
+        ],
+        "summary": "Creates a new film",
+        "description": "Create a new film and return created film object",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns created films",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilmResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns validation error with location, message, type and optional context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    }
+                  },
+                  "example": {
+                    "msg": [
+                      {
+                        "loc": [
+                          "release_date"
+                        ],
+                        "msg": "invalid date format",
+                        "type": "value_error.date"
+                      },
+                      {
+                        "ctx": {
+                          "limit_value": 1
+                        },
+                        "loc": [
+                          "rating"
+                        ],
+                        "msg": "ensure this value is greater than or equal to 1",
+                        "type": "value_error.number.not_ge"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user unauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown genres ids",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "unknown genres ids"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Film name exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "film with this name already exists"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/films/{films_id}": {
+      "get": {
+        "tags": [
+          "Films"
+        ],
+        "summary": "Get exist film",
+        "description": "Get exist film by id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "films_id",
+            "description": "ID of film will geted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns film object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilmResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user unauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Film not exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "film don't exists"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Films"
+        ],
+        "summary": "Update exist film",
+        "description": "Update exist film and return updated film object",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "films_id",
+            "description": "ID of film will updated",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns updated film object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilmResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns validation error with location, message, type and optional context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    }
+                  },
+                  "example": {
+                    "msg": [
+                      {
+                        "loc": [
+                          "release_date"
+                        ],
+                        "msg": "invalid date format",
+                        "type": "value_error.date"
+                      },
+                      {
+                        "ctx": {
+                          "limit_value": 1
+                        },
+                        "loc": [
+                          "rating"
+                        ],
+                        "msg": "ensure this value is greater than or equal to 1",
+                        "type": "value_error.number.not_ge"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user unauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not owner post or not admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "permission denied"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Film or genres not exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "oneOf": [
+                      {
+                        "msg": "film don't exists"
+                      },
+                      {
+                        "msg": "unknown genres ids"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Film name exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "film with this name already exists"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Films"
+        ],
+        "summary": "Delete exist film",
+        "description": "Delete exist film and return deleted film object",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "films_id",
+            "description": "ID of film will deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deleted film object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilmResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user unauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not owner post or not admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "permission denied"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Film not exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "film don't exists"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registration": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Registration a new user",
+        "description": "Registration a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User has been created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user has been created"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns validation error with location, message, type and optional context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    }
+                  },
+                  "example": {
+                    "msg": [
+                      {
+                        "loc": [
+                          "email"
+                        ],
+                        "msg": "value is not a valid email address",
+                        "type": "value_error.email"
+                      },
+                      {
+                        "ctx": {
+                          "limit_value": 8
+                        },
+                        "loc": [
+                          "password1"
+                        ],
+                        "msg": "ensure this value has at least 8 characters",
+                        "type": "value_error.any_str.min_length"
+                      },
+                      {
+                        "ctx": {
+                          "limit_value": 3
+                        },
+                        "loc": [
+                          "name"
+                        ],
+                        "msg": "ensure this value has at least 3 characters",
+                        "type": "value_error.any_str.min_length"
+                      },
+                      {
+                        "msg": "passwords do not match",
+                        "type": "value_error"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User with this email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user with this email already exists"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Login user",
+        "description": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User is login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "successful login"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns validation error with location, message, type and optional context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    }
+                  },
+                  "example": {
+                    "msg": [
+                      {
+                        "loc": [
+                          "email"
+                        ],
+                        "msg": "value is not a valid email address",
+                        "type": "value_error.email"
+                      },
+                      {
+                        "ctx": {
+                          "limit_value": 8
+                        },
+                        "loc": [
+                          "password1"
+                        ],
+                        "msg": "ensure this value has at least 8 characters",
+                        "type": "value_error.any_str.min_length"
+                      },
+                      {
+                        "ctx": {
+                          "limit_value": 3
+                        },
+                        "loc": [
+                          "name"
+                        ],
+                        "msg": "ensure this value has at least 3 characters",
+                        "type": "value_error.any_str.min_length"
+                      },
+                      {
+                        "msg": "passwords do not match",
+                        "type": "value_error"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Wrong password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "wrong password"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User don't exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user don't exists"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Logout user",
+        "description": "Logout user",
+        "responses": {
+          "200": {
+            "description": "User is logout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "successful logout"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "msg": "user unauthorized"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

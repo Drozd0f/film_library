@@ -1,10 +1,17 @@
 services:
+  nginx:
+    image: nginx:1.22
+    ports:
+      - '80:80'
+    depends_on:
+      - app
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+
   app:
     command: bash -c "python3 /film_library/run.py"
     build:
       target: base
-    ports:
-      - '5000:5000'
     volumes:
       - ./film_library:/film_library
     env_file:
@@ -12,15 +19,21 @@ services:
     environment:
       PYTHONUNBUFFERED: 1
       DEV_DB_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
   db:
     env_file:
       - .env
     volumes:
       - db:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER" ]
+
+  swagger:
+    image: swaggerapi/swagger-ui:v4.12.0
+    volumes:
+      - ./docs/swagger_doc.json:/app/swagger.json
+    environment:
+      -  BASE_URL=/api-docs
 
 volumes:
   db:

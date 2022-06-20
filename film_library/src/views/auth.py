@@ -27,7 +27,7 @@ def registration():
             mimetype='application/json'
         )
     return Response(
-        response=json.dumps({'msg': 'user is created'}),
+        response=json.dumps({'msg': 'user has been created'}),
         status=201,
         mimetype='application/json'
     )
@@ -54,7 +54,7 @@ def login():
     except auth_exc.PasswordNotMatchError:
         return Response(
             response=json.dumps({'msg': 'wrong password'}),
-            status=400,
+            status=403,
             mimetype='application/json'
         )
     login_user(user, remember=remember)

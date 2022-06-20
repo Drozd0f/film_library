@@ -9,7 +9,7 @@ from src.exception import films_exc
 film_blueprint = Blueprint('film_blueprint', __name__, url_prefix='/api/v1')
 
 
-@film_blueprint.route('/films/ping')
+@film_blueprint.route('/ping')
 def ping():
     return Response(
         response=json.dumps({'msg': 'pong'}),
@@ -55,7 +55,7 @@ def create_film():
     except films_exc.GenresNotMatchError:
         return Response(
             response=json.dumps({'msg': 'unknown genres ids'}),
-            status=400,
+            status=404,
             mimetype='application/json'
         )
     return Response(
@@ -97,7 +97,7 @@ def update_films(film_id: int):
     except films_exc.GenresNotMatchError:
         return Response(
             response=json.dumps({'msg': 'unknown genres ids'}),
-            status=400,
+            status=404,
             mimetype='application/json'
         )
     return Response(

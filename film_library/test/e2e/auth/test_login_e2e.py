@@ -107,6 +107,6 @@ def test_wrong_password(password: t.List[str], test_user: RegistrationUserSchema
             'password1': password
         }
     )
-    assert response.status_code == 400
+    assert response.status_code == 403
     data = response.get_json()
     assert 'wrong password' == data['msg']

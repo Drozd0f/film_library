@@ -13,6 +13,8 @@ def genre(genres_ids: t.List[str]) -> BinaryExpression:
 
 
 def release_year(release_year_range: list) -> BinaryExpression:
+    if len(release_year_range) == 1:
+        return Film.release_date.in_(release_year_range)
     return Film.release_date.between(*release_year_range)
 
 
