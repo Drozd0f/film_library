@@ -3,7 +3,6 @@ import typing as t
 from datetime import date
 
 import pytest
-import names
 from sqlalchemy.sql.expression import func
 from flask.testing import FlaskClient
 
@@ -41,10 +40,7 @@ def test_client() -> FlaskClient:
 @pytest.fixture
 def director_factory() -> t.Callable[[int], None]:
     def generate_director(count: int):
-        for _ in range(count):
-            name = names.get_first_name()
-            surname = names.get_last_name()
-            database.create_director(name, surname)
+        database.director_generate(count)
     return generate_director
 
 
