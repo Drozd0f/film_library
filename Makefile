@@ -4,7 +4,7 @@ COMPOSE_TEST ?= $(COMPOSE) -f docker-compose.test.yml -p film_library-test
 
 run:
 	$(COMPOSE_DEV) up --build -d
-	@echo http://localhost:5000
+	@echo http://localhost
 
 rm:
 	$(COMPOSE_DEV) rm -sfv
@@ -14,7 +14,6 @@ log-%:
 
 lint:
 	@flake8
-
 
 setup-testenv:
 	docker run --name test-db \
