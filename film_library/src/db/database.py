@@ -2,6 +2,7 @@ import logging
 import typing as t
 from werkzeug.datastructures import ImmutableMultiDict
 
+import names
 from sqlalchemy.exc import IntegrityError
 from flask_sqlalchemy import BaseQuery, Pagination
 
@@ -119,6 +120,13 @@ def delete_film(id_: int) -> ResponseFilmSchema:
 @login_manager.user_loader
 def load_user(user_id: int) -> User:
     return db.session.query(User).filter(User.user_id == user_id).one()
+
+
+def director_generate(count):
+    for _ in range(count):
+        name = names.get_first_name()
+        surname = names.get_last_name()
+        create_director(name, surname)
 
 
 def cleanup():

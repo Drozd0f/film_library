@@ -1,11 +1,11 @@
 from src.app import create_app
-from src.db.database import init_db
+from src.db.database import init_db, director_generate
 
 
 def main():
     app = create_app()
     app.app_context().push()
-    init_db()
+    init_db(), director_generate(10)
     app.run(host='0.0.0.0', port=5000, debug=True)
 
 
