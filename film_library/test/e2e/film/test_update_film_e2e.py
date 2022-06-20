@@ -131,7 +131,7 @@ def test_validate_error(data: dict, expected_loc: t.Tuple[str],
 
 @pytest.mark.parametrize('data', [
     {
-        'name': 'name_1',
+        'name': 'name_0',
         'release_date': '2018-11-11',
         'description': 'jsdadasdas',
         'rating': idx + 1,
@@ -214,6 +214,6 @@ def test_unknown_genres_ids(data: dict, director_factory, film_factory,
     data['genres_id'] = [last_genre_id() + 1]
     data['director_id'] = random_director_id()
     response = test_client.patch(f'/api/v1/films/{last_film_id()}', json=data)
-    assert response.status_code == 400
+    assert response.status_code == 404
     resp_data = response.get_json()
     assert resp_data['msg'] == 'unknown genres ids'

@@ -34,7 +34,7 @@ def test_success(data: dict, test_client: FlaskClient):
     response = test_client.post('/api/v1/registration', json=data)
     assert response.status_code == 201
     data = response.get_json()
-    assert 'user is created' == data['msg']
+    assert data['msg'] == 'user has been created'
 
 
 @pytest.mark.parametrize('data, expected_loc, expected_msg, expected_type', [
