@@ -30,6 +30,6 @@ cleanup-testenv:
 	docker rm -f test-db
 
 
-test:
+test-app:
 	$(COMPOSE_TEST) up --build --abort-on-container-exit
 	$(COMPOSE_TEST) rm -fv

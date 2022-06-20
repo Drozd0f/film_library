@@ -2,6 +2,7 @@ from flask import json, Blueprint, Response, request
 from flask_login import login_user, login_required, logout_user
 from pydantic import ValidationError
 
+from src.app import login_manager
 from src.domain import auth_dom
 from src.exception import auth_exc
 
@@ -71,5 +72,14 @@ def logout():
     return Response(
         response=json.dumps({'msg': 'successful logout'}),
         status=200,
+        mimetype='application/json'
+    )
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return Response(
+        response=json.dumps({'msg': 'user unauthorized'}),
+        status=401,
         mimetype='application/json'
     )

@@ -1,9 +1,11 @@
 import os
+from datetime import timedelta
 
 
 class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    REMEMBER_COOKIE_DURATION = timedelta(days=7)
 
 
 class DevConfig(BaseConfig):

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from werkzeug.security import generate_password_hash
 
 from src.app import db
 from flask_login import UserMixin
@@ -23,6 +24,8 @@ class User(db.Model, UserMixin):
     @classmethod
     def create(cls, data: dict) -> User:
         new_user = cls(**data)
+        new_user.password1 = generate_password_hash(new_user.password1, method='sha256')
+        new_user.password2 = generate_password_hash(new_user.password2, method='sha256')
         db.session.add(new_user)
         db.session.commit()
         return new_user

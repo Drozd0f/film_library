@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 
-from config import DevConfig
+from config import DevConfig, TestingConfig
 
 
 db = SQLAlchemy()
@@ -11,10 +11,12 @@ migrate = Migrate()
 login_manager = LoginManager()
 
 
-def create_app():
+def create_app(is_tests: bool = False):
     app = Flask(__name__)
-    app.config.from_object(DevConfig)
-
+    if is_tests:
+        app.config.from_object(TestingConfig)
+    else:
+        app.config.from_object(DevConfig)
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db, directory='migrations')
